@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!--引入 kindeditor 相关依赖-->
+    <script src="{% static 'kindeditor/kindeditor-all-min.js' %}"></script>
+    <script src="{% static 'kindeditor/lang/zh-CN.js' %}"></script>
+    <script>
+        // 创建富文本编辑器
+        KindEditor.ready(function (K) {
+            K.create("#editor_id", {
+                width: "900px",     // 指定富文本的宽度   优先级最高
+                height: "400px",    // 指定富文本的高度
+                //items: [],        // 指定富文本的工具栏按钮
+                resizeType: 2,       // 富文本是否可以改变大小
+                uploadJson: "/article/upload_img/", // 图片上传时的url
+                allowFileManager: true,         // 显示图片空间按钮
+                fileManagerJson: "/article/get_img/",            // 浏览曾经上传过放入图片
+            });
+        })
+    </script>
+</head>
+<body>
+<textarea id="editor_id" name="content" style="width:700px;height:300px;">
+
+</textarea>
+</body>
+</html>

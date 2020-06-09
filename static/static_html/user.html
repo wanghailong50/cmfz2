@@ -1,0 +1,253 @@
+<script>
+    $(function () {
+        $("#bannerTable").jqGrid({
+            url: "/userapp/get_all_data/",
+            datatype: 'json',
+            styleUI: "Bootstrap",
+            autowidth: true,
+            pager: "#bannerPagerNew",
+            rowNum: 2,
+            rowList: [2, 5, 10],
+            viewrecords: true,
+            editurl:'/index/data/',
+            colNames: ["ID","电话","用户名","性别","签名","头像","地址","封禁状态",'封禁操作'],
+            colModel: [
+                {name: "id"},
+                {name: "phone"},
+                {name: "username"},
+                {name: "danger",editable: true,formatter:function (value,options,rowObj) {
+                        if(value==='False'){
+                            return "女"
+                        }else{
+                            return "男"
+                        }
+                    }},
+                {name:"sign"},
+                {name: "pic", formatter: function (value, options, rowObj) {
+                    // http://127.0.0.1:8000/系统自动拼接    static/img/shouye.jpg
+                        return "<img style='height: 20px;height: 20px' src=\"/static/"+value+"\" alt=\"\">";
+
+                    }},
+
+                {name:"address"},
+                {name:"status"},
+                {name: "option",formatter:function (cellvalue,options,rowObject) {
+                        return "<button data-toggle=\"modal\"\n" +
+                            "data-target=\"#bannerModal\" class=\"btn btn-danger glyphicon glyphicon-edit\" onclick=\"change("+rowObject.id+")\">封禁用户操作</button> "
+                    }},
+
+            ],
+
+        });
+
+
+
+
+
+
+        // 点击模态框保存按钮  去提交轮播图信息
+        $("#save").click(function () {
+            // 分别获取表单的值
+            let title = $("#upload_title").val();
+            let status = $("#upload_status").val();
+            // 获取文件类型的数据
+            let file = $("#upload_pic")[0].files[0];
+
+            let formData = new FormData();
+            formData.append("title", title);
+            formData.append("status", status);
+            formData.append("img", file);
+
+            $.ajax({
+                url: "/index/add_banner/",
+                type: "post",
+                data: formData, // 通过formData传递文件类型的数据
+                // 使用formData传递数据必须指定 processData  contentType
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    console.log(data);
+                    // 判断添加是否成功  成功则刷新表格
+                    if (data==="success"){
+                        // 刷新表格
+                        $("#bannerTable").trigger("reloadGrid");
+                    }
+                }
+            });
+        })
+
+    });
+
+
+    function del(id) {
+            let file = $("#upload_pic1")[0].files[0];
+            $('#bannerTable').jqGrid('delGridRow',id,{
+                height: 300,
+                reloadAfterSubmit: true
+            })
+        }
+
+    function change(id) {
+        f(id)
+        $('#bannerTable').jqGrid('editGridRow',id,{
+            height: 300,
+            reloadAfterSubmit: true
+        })
+    }
+
+
+
+    function f(id) {
+
+        $('#save1').click(function () {
+            // 获取文件类型的数据
+            let ban=$('#status1').val()
+            let formData = new FormData();
+            formData.append("id",id)
+            formData.append('ban',ban)
+            $.ajax({
+                url: "/userapp/ban_user/",
+                type: "post",
+                data: formData, // 通过formData传递文件类型的数据
+                // 使用formData传递数据必须指定 processData  contentType
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    // 判断添加是否成功  成功则刷新表格
+                    if (data==="success"){
+                        // 刷新表格
+                        $("#bannerTable").trigger("reloadGrid");
+                    }
+                }
+            })
+        })
+    }
+</script>
+
+
+<div class="page-header">
+    <h2>轮播图管理</h2>
+
+
+
+</div>
+<ul class="nav nav-tabs ">
+    <li class="active"><a href="#"><b>轮播图信息</b></a></li>
+</ul>
+
+<div class="panel panel-default" style="padding: 40px">
+    <!-- jqgrid表格的容器 -->
+    <table id="bannerTable"></table>
+    <div class="alert alert-success" role="alert" id="addBannerMsg" style="display: none">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                aria-hidden="true">&times;</span></button>
+        <strong id="msgShow"></strong>
+    </div>
+    <div id="bannerPagerNew" style="width: auto;height: 50px"></div>
+    <!--模态框的打开方式  可以使用modal方法打开 也可以通过指定data-target与data-toggle两个属性来打开指定的模态框 -->
+
+
+
+</div>
+
+
+<body>
+
+<!--模态框-->
+<div class="modal fade" id="bannerModal1" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="width:750px">
+            <!--模态框标题-->
+            <div class="modal-header">
+                <!--
+                    用来关闭模态框的属性:data-dismiss="modal"
+                -->
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title">编辑用户信息</h4>
+            </div>
+
+            <!--模态框内容体-->
+            <div class="modal-body">
+                <!--模态框内容体-->
+                <form action="" id="bannerForm">
+                    <div class="modal-body form-horizontal">
+                        <div class="form-group ">
+                            <label class="col-sm-2 control-label">描述：</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="title" id="upload_title" class="form-control"
+                                       placeholder="请输入图片标题">
+                            </div>
+                        </div>
+                        <div class="form-group ">
+                            <label class="col-sm-2 control-label">状态：</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="status" id="upload_status" class="form-control"
+                                       placeholder="请选择文件状态">
+                            </div>
+                        </div>
+                        <div class="form-group ">
+                            <label class="col-sm-2 control-label">图片：</label>
+                            <div class="col-sm-10">
+                                <input type="file" name="pic" id="upload_pic" class="form-control" placeholder="">
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+            <!--模态页脚-->
+            <div class="modal-footer" id="modal_footer">
+                <button type="button" class="btn btn-primary" id="save">保存</button>
+                <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--修改使用的模态框-->
+<div class="modal fade" id="bannerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="width:750px">
+            <!--模态框标题-->
+            <div class="modal-header">
+                <!--
+                    用来关闭模态框的属性:data-dismiss="modal"
+                -->
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title">编辑用户信息</h4>
+            </div>
+
+            <!--模态框内容体-->
+            <div class="modal-body">
+                <!--模态框内容体-->
+                <form action="" id="bannerForm">
+                    <div class="modal-body form-horizontal">
+
+
+
+                        <div class="form-group ">
+                            <label class="col-sm-2 control-label">状态：</label>
+                            <div class="col-sm-10">
+                                <select name="" id="status1" class="form-control">
+                                    <option value="1">封禁</option>
+                                    <option value="0">解除封禁</option>
+                                </select>
+
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                </form>
+            </div>
+            <!--模态页脚-->
+            <div class="modal-footer" id="modal_footer">
+                <button type="button" class="btn btn-primary" id="save1">保存</button>
+                <button type="button" class="btn btn-warning" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+

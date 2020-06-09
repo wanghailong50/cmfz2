@@ -1,0 +1,49 @@
+<body>
+<div id="main" style="width: 800px;height:600px;"></div>
+
+<script type="text/javascript">
+    var myChart = echarts.init(document.getElementById('main'));
+
+        let option1 = {
+        title: {
+            text: '2020年上半年用户注册趋势',
+        },
+        tooltip: {},
+        legend: {
+            data: ['销量']
+        },
+        xAxis: {
+            data: [],
+        },
+        yAxis: {},
+        series: [{
+            name: '销量',
+            type: 'bar',
+            data: [],
+        }]
+    };
+
+
+    myChart.setOption(option1);
+
+
+    $.ajax({
+        url: "/userapp/get_data/",
+        dataType: "json",
+        type: "get",
+        success: function (data) {
+            myChart.setOption({
+                xAxis: {
+                    data: data.x,
+                },
+                series: [{
+                    name: '注册趋势',
+                    type: 'line',
+                    data: data.y,
+                }]
+            });
+        }
+    })
+
+</script>
+</body>
